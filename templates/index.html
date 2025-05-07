@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Блог</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Посты</h1>
+    <ul>
+        {% for post in posts %}
+            <li>{{ post.title }} - {{ post.date_posted }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
