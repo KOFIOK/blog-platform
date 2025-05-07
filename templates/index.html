@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Блог-платформа</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
@@ -32,25 +34,33 @@
         {% endwith %}
         
         {% if posts %}
-            <div class="posts-container">
+            <div class="posts-list">
                 {% for post in posts %}
-                    <article class="post-card">
-                        <h3><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
+                    <article class="post-item">
+                        <div class="post-header">
+                            <h3><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
+                        </div>
                         <div class="post-meta">
-                            <span class="post-date">{{ post.date_posted.strftime('%d.%m.%Y') }}</span>
+                            <span class="post-date"><i class="far fa-calendar-alt"></i> {{ post.date_posted.strftime('%d.%m.%Y') }}</span>
                             {% if post.author %}
-                                <span class="post-author">Автор: {{ post.author.username }}</span>
+                                <span class="post-author"><i class="far fa-user"></i> {{ post.author.username }}</span>
                             {% else %}
-                                <span class="post-author">Автор: ID {{ post.user_id }}</span>
+                                <span class="post-author"><i class="far fa-user"></i> ID {{ post.user_id }}</span>
                             {% endif %}
                             {% if post.category %}
-                                <span class="post-category">Категория: {{ post.category.name }}</span>
+                                <span class="post-category"><i class="far fa-folder"></i> {{ post.category.name }}</span>
                             {% endif %}
                         </div>
                         <div class="post-excerpt">
-                            {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
+                            {{ post.content[:300] }}{% if post.content|length > 300 %}...{% endif %}
                         </div>
-                        <a href="{{ url_for('post', post_id=post.id) }}" class="read-more">Читать далее</a>
+                        <div class="post-footer">
+                            <div class="post-stats">
+                                <span class="post-likes"><i class="fas fa-heart"></i> {{ post.like_count }}</span>
+                                <span class="post-comments"><i class="fas fa-comment"></i> {{ post.comments|length }}</span>
+                            </div>
+                            <a href="{{ url_for('post', post_id=post.id) }}" class="read-more">Читать далее</a>
+                        </div>
                     </article>
                 {% endfor %}
             </div>

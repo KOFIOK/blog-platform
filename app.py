@@ -4,7 +4,7 @@ from flask_login import LoginManager, login_user, current_user, logout_user, log
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost/blog_platform'
-app.config['SECRET_KEY'] = 'ваш_секретный_ключ_здесь'  # Необходимо для защиты форм
+app.config['SECRET_KEY'] = 'a_very_secure_secret_key_for_blog_platform'  # Безопасный ASCII ключ
 db = SQLAlchemy(app)
 
 # Настройка Flask-Login
@@ -17,8 +17,8 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-from models import Post, User, Category
-from forms import RegistrationForm, LoginForm
+from models import Post, User, Category, Comment, Like
+from forms import RegistrationForm, LoginForm, CommentForm
 
 # Create a route to initialize the database
 @app.route('/init-db')
@@ -31,10 +31,74 @@ def index():
     posts = Post.query.order_by(Post.date_posted.desc()).all()
     return render_template('index.html', posts=posts)
 
-@app.route('/post/<int:post_id>')
+@app.route('/post/<int:post_id>', methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template('post.html', post=post)
+    form = CommentForm()
+    
+    if form.validate_on_submit():
+        if current_user.is_authenticated:
+            comment = Comment(
+                content=form.content.data,
+                post_id=post.id,
+                user_id=current_user.id
+            )
+            db.session.add(comment)
+            db.session.commit()
+            flash('Ваш комментарий добавлен!', 'success')
+            return redirect(url_for('post', post_id=post.id))
+        else:
+            flash('Для добавления комментариев необходимо войти в систему', 'info')
+            return redirect(url_for('login'))
+    
+    # Получаем комментарии для поста, отсортированные по дате (новые сверху)
+    comments = Comment.query.filter_by(post_id=post.id).order_by(Comment.date_posted.desc()).all()
+    
+    return render_template('post.html', post=post, form=form, comments=comments)
+
+@app.route('/post/<int:post_id>/like', methods=['POST'])
+@login_required
+def like_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    
+    # Проверяем, поставил ли пользователь уже лайк этому посту
+    existing_like = Like.query.filter_by(
+        user_id=current_user.id,
+        post_id=post.id
+    ).first()
+    
+    if existing_like:
+        # Если лайк уже поставлен - удаляем его (отмена лайка)
+        db.session.delete(existing_like)
+        db.session.commit()
+        flash('Лайк удален', 'success')
+    else:
+        # Если лайка нет - добавляем новый
+        like = Like(user_id=current_user.id, post_id=post.id)
+        db.session.add(like)
+        db.session.commit()
+        flash('Лайк добавлен', 'success')
+    
+    # Возвращаемся на страницу, с которой пришел запрос
+    next_page = request.args.get('next') or request.referrer
+    return redirect(next_page or url_for('index'))
+
+@app.route('/comment/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    
+    # Проверка, что текущий пользователь - автор комментария или администратор
+    if comment.user_id != current_user.id:
+        abort(403)  # Запрещено
+    
+    post_id = comment.post_id  # Сохраняем id поста перед удалением комментария
+    
+    db.session.delete(comment)
+    db.session.commit()
+    
+    flash('Комментарий удален', 'success')
+    return redirect(url_for('post', post_id=post_id))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

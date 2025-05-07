@@ -1,0 +1,128 @@
+/* Стили для детальной страницы поста */
+.post-detail-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.post-detail {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.post-header h2 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 2rem;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+.post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: #7f8c8d;
+}
+
+.post-meta i {
+    margin-right: 0.3rem;
+    color: #95a5a6;
+}
+
+.post-content {
+    color: #333;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
+}
+
+.post-content p {
+    margin-bottom: 1.5rem;
+}
+
+.post-reactions {
+    padding-top: 1.5rem;
+    border-top: 1px solid #ecf0f1;
+}
+
+.like-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.like-count-display {
+    font-size: 1rem;
+    color: #7f8c8d;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.like-count-display i {
+    color: #e74c3c;
+}
+
+.like-form {
+    margin: 0;
+}
+
+.like-button {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: #333;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.like-button:hover {
+    background-color: #f1f1f1;
+}
+
+.like-button.liked {
+    background-color: #e8f4fd;
+    color: #2980b9;
+    border-color: #bbdefb;
+}
+
+.like-button.liked i {
+    color: #e74c3c;
+}
+
+.like-button.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.post-navigation {
+    margin-top: 2rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}

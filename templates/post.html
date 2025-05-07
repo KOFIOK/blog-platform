@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>{{ post.title }} - Блог-платформа</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/post-detail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/comments.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
@@ -20,7 +23,7 @@
         </nav>
     </header>
     
-    <main class="post-detail">
+    <main class="post-detail-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -29,28 +32,121 @@
             {% endif %}
         {% endwith %}
         
-        <article>
-            <h2>{{ post.title }}</h2>
-            
-            <div class="post-meta">
-                <span class="post-date">{{ post.date_posted.strftime('%d.%m.%Y %H:%M') }}</span>
-                {% if post.author %}
-                    <span class="post-author">Автор: {{ post.author.username }}</span>
-                {% else %}
-                    <span class="post-author">Автор: ID {{ post.user_id }}</span>
-                {% endif %}
-                {% if post.category %}
-                    <span class="post-category">Категория: {{ post.category.name }}</span>
-                {% endif %}
+        <article class="post-detail">
+            <div class="post-header">
+                <h2>{{ post.title }}</h2>
+                <div class="post-meta">
+                    <span class="post-date"><i class="far fa-calendar-alt"></i> {{ post.date_posted.strftime('%d.%m.%Y %H:%M') }}</span>
+                    {% if post.author %}
+                        <span class="post-author"><i class="far fa-user"></i> {{ post.author.username }}</span>
+                    {% else %}
+                        <span class="post-author"><i class="far fa-user"></i> ID {{ post.user_id }}</span>
+                    {% endif %}
+                    {% if post.category %}
+                        <span class="post-category"><i class="far fa-folder"></i> {{ post.category.name }}</span>
+                    {% endif %}
+                </div>
             </div>
             
             <div class="post-content">
                 {{ post.content }}
             </div>
+            
+            <!-- Секция лайков -->
+            <div class="post-reactions">
+                <div class="like-section">
+                    <div class="like-count-display">
+                        <i class="fas fa-heart"></i> <span>{{ post.like_count }}</span> лайков
+                    </div>
+                    
+                    {% if current_user.is_authenticated %}
+                        <form action="{{ url_for('like_post', post_id=post.id) }}" method="post" class="like-form">
+                            <button type="submit" class="like-button {% if post.liked_by(current_user) %}liked{% endif %}">
+                                {% if post.liked_by(current_user) %}
+                                    <i class="fas fa-heart"></i> Вам нравится
+                                {% else %}
+                                    <i class="far fa-heart"></i> Нравится
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="like-button disabled" onclick="alert('Для того чтобы ставить лайки, необходимо войти в систему')">
+                            <i class="far fa-heart"></i> Нравится
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </article>
         
+        <!-- Секция комментариев -->
+        <section class="comments-section">
+            <div class="comments-header">
+                <h3><i class="fas fa-comments"></i> Комментарии <span class="comments-count">{{ comments|length }}</span></h3>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+                <div class="comment-form-container">
+                    <form method="POST" action="" class="comment-form">
+                        {{ form.hidden_tag() }}
+                        <div class="form-group">
+                            {{ form.content(class="form-input", placeholder="Оставьте свой комментарий...") }}
+                            {% if form.content.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.content.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.submit(class="form-button") }}
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                <div class="login-to-comment">
+                    <p><i class="fas fa-lock"></i> Чтобы оставить комментарий, необходимо <a href="{{ url_for('login') }}">войти</a> или <a href="{{ url_for('register') }}">зарегистрироваться</a>.</p>
+                </div>
+            {% endif %}
+            
+            <div class="comments-list">
+                {% if comments %}
+                    {% for comment in comments %}
+                        <div class="comment-item">
+                            <div class="comment-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-meta">
+                                    <span class="comment-author">{{ comment.author.username }}</span>
+                                    <div class="comment-actions">
+                                        <span class="comment-date"><i class="far fa-clock"></i> {{ comment.date_posted.strftime('%d.%m.%Y %H:%M') }}</span>
+                                        {% if current_user.is_authenticated and current_user.id == comment.user_id %}
+                                            <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="post" class="delete-comment-form">
+                                                <button type="submit" class="delete-comment-btn" onclick="return confirm('Вы уверены, что хотите удалить этот комментарий?')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="comment-text">
+                                    {{ comment.content }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-comments">
+                        <i class="far fa-comment-dots"></i>
+                        <p>Пока нет комментариев. Будьте первым!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+        
         <div class="post-navigation">
-            <a href="{{ url_for('index') }}" class="back-link">← Вернуться к списку постов</a>
+            <a href="{{ url_for('index') }}" class="back-link"><i class="fas fa-arrow-left"></i> Вернуться к списку постов</a>
         </div>
     </main>
     
