@@ -1,0 +1,28 @@
+# Игнорирование кэш-файлов Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Игнорирование виртуального окружения
+.venv/
+venv/
+env/
+
+# Игнорирование файлов с окружением
+.env
+*.env
+
+# Логи
+bot.log
+main.log
+*.log
+
+# Локальные настройки IDE и редакторов
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Другое
+.coverage
+secret-key
