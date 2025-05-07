@@ -2,15 +2,51 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Блог</title>
+    <title>Блог-платформа</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Посты</h1>
-    <ul>
-        {% for post in posts %}
-            <li>{{ post.title }} - {{ post.date_posted }}</li>
-        {% endfor %}
-    </ul>
+    <header>
+        <h1>Блог-платформа</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Главная</a>
+            <!-- Здесь могут быть дополнительные ссылки навигации -->
+        </nav>
+    </header>
+    
+    <main>
+        <h2>Последние публикации</h2>
+        
+        {% if posts %}
+            <div class="posts-container">
+                {% for post in posts %}
+                    <article class="post-card">
+                        <h3><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
+                        <div class="post-meta">
+                            <span class="post-date">{{ post.date_posted.strftime('%d.%m.%Y') }}</span>
+                            {% if post.author %}
+                                <span class="post-author">Автор: {{ post.author.username }}</span>
+                            {% else %}
+                                <span class="post-author">Автор: ID {{ post.user_id }}</span>
+                            {% endif %}
+                            {% if post.category %}
+                                <span class="post-category">Категория: {{ post.category.name }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="post-excerpt">
+                            {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
+                        </div>
+                        <a href="{{ url_for('post', post_id=post.id) }}" class="read-more">Читать далее</a>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-posts">Пока нет опубликованных постов.</p>
+        {% endif %}
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Блог-платформа</p>
+    </footer>
 </body>
 </html>
