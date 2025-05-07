@@ -10,12 +10,26 @@
         <h1>Блог-платформа</h1>
         <nav>
             <a href="{{ url_for('index') }}">Главная</a>
-            <!-- Здесь могут быть дополнительные ссылки навигации -->
+            {% if current_user.is_authenticated %}
+                <span class="user-greeting">Привет, {{ current_user.username }}!</span>
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Войти</a>
+                <a href="{{ url_for('register') }}">Регистрация</a>
+            {% endif %}
         </nav>
     </header>
     
     <main>
         <h2>Последние публикации</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         
         {% if posts %}
             <div class="posts-container">

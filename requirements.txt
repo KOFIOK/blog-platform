@@ -2,3 +2,7 @@ flask
 flask-sqlalchemy
 mysqlclient
 pymysql
+flask-login
+flask-wtf
+werkzeug
+email_validator
