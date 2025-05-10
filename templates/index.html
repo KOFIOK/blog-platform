@@ -13,6 +13,7 @@
         <nav>
             <a href="{{ url_for('index') }}">Главная</a>
             {% if current_user.is_authenticated %}
+                <a href="{{ url_for('new_post') }}"><i class="fas fa-plus"></i> Новый пост</a>
                 <span class="user-greeting">Привет, {{ current_user.username }}!</span>
                 <a href="{{ url_for('logout') }}">Выйти</a>
             {% else %}
@@ -39,6 +40,19 @@
                     <article class="post-item">
                         <div class="post-header">
                             <h3><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
+                            
+                            {% if current_user.is_authenticated and current_user.id == post.user_id %}
+                            <div class="post-controls">
+                                <a href="{{ url_for('update_post', post_id=post.id) }}" class="post-control edit-post">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" class="delete-post-form" onsubmit="return confirm('Вы уверены, что хотите удалить этот пост?');">
+                                    <button type="submit" class="post-control delete-post">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
                         </div>
                         <div class="post-meta">
                             <span class="post-date"><i class="far fa-calendar-alt"></i> {{ post.date_posted.strftime('%d.%m.%Y') }}</span>

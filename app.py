@@ -18,7 +18,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 from models import Post, User, Category, Comment, Like
-from forms import RegistrationForm, LoginForm, CommentForm
+from forms import RegistrationForm, LoginForm, CommentForm, PostForm
 
 # Create a route to initialize the database
 @app.route('/init-db')
@@ -55,6 +55,64 @@ def post(post_id):
     comments = Comment.query.filter_by(post_id=post.id).order_by(Comment.date_posted.desc()).all()
     
     return render_template('post.html', post=post, form=form, comments=comments)
+
+@app.route('/post/new', methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        # Обработка случая "Без категории" (id=0)
+        category_id = form.category_id.data if form.category_id.data != 0 else None
+        
+        post = Post(
+            title=form.title.data,
+            content=form.content.data,
+            category_id=category_id,
+            user_id=current_user.id
+        )
+        db.session.add(post)
+        db.session.commit()
+        flash('Ваш пост опубликован!', 'success')
+        return redirect(url_for('index'))
+    return render_template('create_post.html', title='Новый пост', form=form, legend='Новый пост')
+
+@app.route('/post/<int:post_id>/update', methods=['GET', 'POST'])
+@login_required
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.user_id != current_user.id:
+        abort(403)  # Запрещено, если пользователь не автор поста
+    
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        # Обработка случая "Без категории" (id=0)
+        post.category_id = form.category_id.data if form.category_id.data != 0 else None
+        
+        db.session.commit()
+        flash('Ваш пост обновлен!', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    elif request.method == 'GET':
+        form.title.data = post.title
+        form.content.data = post.content
+        # Установить выбранную категорию или 0, если категории нет
+        form.category_id.data = post.category_id if post.category_id else 0
+    
+    return render_template('create_post.html', title='Редактирование поста', 
+                          form=form, legend='Редактирование поста')
+
+@app.route('/post/<int:post_id>/delete', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.user_id != current_user.id:
+        abort(403)  # Запрещено, если пользователь не автор поста
+    
+    db.session.delete(post)
+    db.session.commit()
+    flash('Ваш пост был удален!', 'success')
+    return redirect(url_for('index'))
 
 @app.route('/post/<int:post_id>/like', methods=['POST'])
 @login_required

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from models import User
+from models import User, Category
 
 class RegistrationForm(FlaskForm):
     username = StringField('Имя пользователя', 
@@ -35,3 +35,17 @@ class LoginForm(FlaskForm):
 class CommentForm(FlaskForm):
     content = TextAreaField('Комментарий', validators=[DataRequired()])
     submit = SubmitField('Отправить')
+
+class PostForm(FlaskForm):
+    title = StringField('Заголовок', validators=[DataRequired(), Length(min=3, max=100)])
+    content = TextAreaField('Содержание', validators=[DataRequired()])
+    category_id = SelectField('Категория', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Опубликовать')
+    
+    def __init__(self, *args, **kwargs):
+        super(PostForm, self).__init__(*args, **kwargs)
+        # Заполняем категории из базы данных
+        self.category_id.choices = [(category.id, category.name) 
+                                   for category in Category.query.order_by(Category.name).all()]
+        # Добавляем опцию "Без категории"
+        self.category_id.choices.insert(0, (0, 'Без категории'))

@@ -19,6 +19,12 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.15);
 }
 
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
 .post-header h3 {
     margin-top: 0;
     margin-bottom: 1rem;
@@ -34,6 +40,41 @@
 
 .post-header h3 a:hover {
     color: #3498db;
+}
+
+.post-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.post-control {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: white;
+    transition: opacity 0.2s;
+    cursor: pointer;
+}
+
+.post-control:hover {
+    opacity: 0.8;
+}
+
+.edit-post {
+    background-color: #3498db;
+}
+
+.delete-post {
+    background-color: #e74c3c;
+    border: none;
+}
+
+.delete-post-form {
+    margin: 0;
+    padding: 0;
 }
 
 .post-meta {
