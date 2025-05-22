@@ -99,7 +99,10 @@ blog-platform/
 
 ## 🖼️ Скриншоты
 
-*Скриншоты интерфейса будут добавлены позже*
+![Главная страница](static/images/homepage.png)
+![Создание поста](static/images/post_create.png)
+![Страница поста](static/images/post_page.png)
+![Форма входа](static/images/login_form.png)
 
 ## 📝 TODO
 
